@@ -1,65 +1,90 @@
 import React, { Component } from 'react';
-import { Text, TouchableOpacity, View, LayoutAnimation } from 'react-native';
-import { CardSection } from './common';
+import {
+  Text,
+  TouchableWithoutFeedback,
+  View,
+  LayoutAnimation
+} from 'react-native';
 import { connect } from 'react-redux';
+import { CardSection } from './common';
 import * as actions from '../actions';
 
 class ListItem extends Component {
+  componentWillUpdate() {
+    LayoutAnimation.linear();
+  }
 
-	componentWillUpdate() {
-		LayoutAnimation.spring();
-	}
+  renderHeader() {
+    const { titleStyle, titleStyleExpanded } = styles;
+    const { expanded } = this.props;
+    const { title } = this.props.library;
+      return (
+        <CardSection>
+          <Text style={expanded ? titleStyleExpanded : titleStyle}>
+            {title}
+          </Text>
+        </CardSection>
+      );
+  }
 
-	renderDescription() {
-		const { library, expanded } = this.props;
+  renderDescription() {
+    const { library, expanded } = this.props;
+    const { contentStyle } = styles;
 
-		if (expanded) {
-			return (
-				<CardSection>
-					<Text style={{ flex: 1 }}>
-						{library.description}
-					</Text>
-				</CardSection>
-			);
-		}
-	}
-	render() {
-		const { titleStyle } = styles;
-		const { id, title } = this.props.library;
+    if (expanded) {
+      return (
+        <CardSection>
+          <Text style={ contentStyle }>
+            {library.description}
+          </Text>
+        </CardSection>
+      );
+    }
+  }
 
-		return (
-			<TouchableOpacity onPress={() => this.props.selectLibrary(id)}>
-				<View>
-					<CardSection>
-						<Text style={titleStyle}>
-							{title}
-						</Text>
-					</CardSection>
-					{this.renderDescription()}
-				</View>
-			</TouchableOpacity>
-		);
-	}
+  render() {
+    const { id } = this.props.library;
+
+    return (
+      <TouchableWithoutFeedback
+        onPress={() => this.props.selectLibrary(id)}
+      >
+        <View>
+          {this.renderHeader()}
+          {this.renderDescription()}
+        </View>
+      </TouchableWithoutFeedback>
+    );
+  }
 }
 
 const styles = {
-	titleStyle :{
-		fontSize: 18,
-		paddingLeft: 15
-	},
-	descriptionStyle: {
-		paddingLeft: 10,
-		paddingRight: 10
-	}
+  titleStyle: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  titleStyleExpanded: {
+    fontSize: 18,
+    paddingLeft: 15,
+    paddingRight: 15,
+    backgroundColor: '#457924',
+    textAlign: 'center',
+  },
+  descriptionStyle: {
+    paddingLeft: 10,
+    paddingRight: 10
+  },
+  contentStyle: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 20,
+  }
 };
 
-//want to consume application level state add mapStateToProps
 const mapStateToProps = (state, ownProps) => {
-	const expanded = state.selectedLibraryID === ownProps.library.id;
+  const expanded = state.selectedLibraryId === ownProps.library.id;
 
-	return { expanded };
+  return { expanded };
 };
 
-// the purpose of the first set of parents is the mapStateToProps function
-//bind action creators to this
 export default connect(mapStateToProps, actions)(ListItem);
